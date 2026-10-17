@@ -1,0 +1,80 @@
+# ---------- Fresher Job Alert config ----------
+interval_minutes: 10          # how often to check (loop mode)
+db: seen.db                   # remembers jobs already sent
+
+filters:
+  # a job must contain at least one of these (company career-site sources are lenient, see README)
+  include: [fresher, freshers, graduate, graduates, entry level, entry-level, trainee,
+            off campus, off-campus, offcampus, campus hiring, walk-in, walk in,
+            associate engineer, associate software, software engineer trainee,
+            "0-1 year", "0-2 year", "0 to 2 year", "2025 batch", "2026 batch", "2025", "2026"]
+  # if any of these appear in the TITLE the job is dropped
+  exclude_title: [senior, sr., lead, manager, architect, director, principal, head of,
+                  vp, consultant, specialist, staff engineer]
+  # drop if text asks for 3+ years of experience
+  exclude_regex: ['(?<![\d\-–])([3-9]|1[0-9])\s*\+?\s*(-\s*\d+\s*)?(years|yrs)']
+  # only applied to sources that give a location (company sites). Empty = anywhere
+  locations: [india, chennai, bangalore, bengaluru, hyderabad, pune, mumbai, noida,
+              gurgaon, gurugram, kolkata, coimbatore, remote]
+
+# companies you care about most -> alert gets a star
+watch_companies: [hcl, hcltech, wipro, infosys, tcs, cognizant, accenture, capgemini,
+                  tech mahindra, zoho, ltimindtree, ibm, deloitte]
+
+sources:
+  # 1) Google News: catches off-campus drive announcements within minutes. Works out of the box.
+  - type: google_news
+    name: GoogleNews
+    queries:
+      - HCL off campus drive freshers
+      - Wipro off campus hiring freshers
+      - Infosys off campus freshers
+      - TCS off campus freshers
+      - Cognizant off campus freshers
+      - Accenture off campus freshers
+      - Capgemini off campus freshers
+      - off campus drive 2026 batch
+      - freshers hiring 2026 batch engineer
+
+  # 2) Public Telegram placement channels (add channel usernames, no @).
+  #    Open the channel in a browser at t.me/s/<name> to check it's public.
+  - type: telegram
+    name: TelegramChannels
+    channels: []          # e.g. [some_offcampus_channel, another_channel]
+
+  # 3) Any RSS/Atom feed
+  # - type: rss
+  #   name: SomeBoard
+  #   url: https://example.com/jobs/feed
+
+  # 4) Workday career sites (many MNCs). Find host/tenant/site from the careers page URL:
+  #    https://<host>/<site>  ->  tenant is the first part of host.
+  # - type: workday
+  #   name: SomeCompany
+  #   host: company.wd3.myworkdayjobs.com
+  #   tenant: company
+  #   site: External
+  #   search: fresher
+  #   pages: 3
+
+  # 5) Greenhouse / Lever (lots of startups)
+  # - {type: greenhouse, name: SomeStartup, token: boardtoken}
+  # - {type: lever, name: SomeStartup, company: companyslug}
+
+  # 6) ANY career site: open the page, F12 -> Network -> Fetch/XHR, find the request that
+  #    returns the job list, then describe it here (this is how you add HCL/Wipro/Infosys).
+  # - type: json_api
+  #   name: Wipro
+  #   url: https://careers.example.com/api/jobs?keyword=fresher
+  #   method: GET                  # or POST
+  #   body: {}                     # JSON body for POST
+  #   list_path: data.jobs         # where the list is inside the JSON ("" if top-level)
+  #   title_field: title
+  #   location_field: location
+  #   url_template: "https://careers.example.com/job/{id}"   # {id} etc = fields of each item
+  #   lenient: true
+
+  # 7) Static job-listing web pages (collects links)
+  # - type: html_links
+  #   name: SomeSite
+  #   url: https://example.com/off-campus-jobs
